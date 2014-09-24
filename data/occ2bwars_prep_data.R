@@ -4,7 +4,7 @@
 rm(list=ls()) # clear R
 
 ### add packages ###
-library(sparta)
+library("sparta")
 install.packages("W:/PYWELL_SHARED/Pywell Projects/BRC/Colin/R packages/BRCmap_0.0.7.zip",repos = NULL)
 library("BRCmap")
 
@@ -66,65 +66,90 @@ bwars <- bwars[!bwars$taxa=="",]# drop blank species records
      
      ## which looks as expected:    
 #result 
-     
-### Split the data into bees, wasps and ants ###
-taxonomy <- read.csv(paste(datadir,"Aculeate_Species_Family_Group.csv",sep=""),header=T) # load in the names file
-taxonomy <- taxonomy[,c("FullName","Popular_group_Name")]
+
+#create subset containing only the records for Bombus spp.
+bombus<- subset(bwars, "TRUE"==grepl("BOMBUS", bwars$taxa))
+
+
+### Split the data into bees, wasps and ants ### 
+
+###this is now redundant see below for Bombus LL calculation
+
+#taxonomy <- read.csv(paste(datadir,"Aculeate_Species_Family_Group.csv",sep=""),header=T) # load in the names file
+#taxonomy <- taxonomy[,c("FullName","Popular_group_Name")]
 
 # correct 4 names prior to merge
-bwars$taxa <- as.character(bwars$taxa)
-bwars[bwars$taxa=="PEMPHREDON rugifera","taxa"] <- rep("PEMPHREDON rugifer",nrow(bwars[bwars$taxa=="PEMPHREDON rugifera",])) 
+#bwars$taxa <- as.character(bwars$taxa)
+#bwars[bwars$taxa=="PEMPHREDON rugifera","taxa"] <- rep("PEMPHREDON rugifer",nrow(bwars[bwars$taxa=="PEMPHREDON rugifera",])) 
 
-bwars <- merge(bwars,taxonomy,by.x="taxa",by.y="FullName")
+#bwars <- merge(bwars,taxonomy,by.x="taxa",by.y="FullName")
 
 ##### NEED TO SPLIT BEES, WASPS AND ANTS ######
-ants <- bwars[bwars$Popular_group_Name=="Ant",]
-wasps <- bwars[bwars$Popular_group_Name=="Wasp",]
-bees <- bwars[bwars$Popular_group_Name=="Bee",]
+#ants <- bwars[bwars$Popular_group_Name=="Ant",]
+#wasps <- bwars[bwars$Popular_group_Name=="Wasp",]
+#bees <- bwars[bwars$Popular_group_Name=="Bee",]
 
-ants <- ants[,1:4]
-wasps <- wasps[,1:4]
-bees <- bees[,1:4]
+#ants <- ants[,1:4]
+#wasps <- wasps[,1:4]
+#bees <- bees[,1:4]
 
 # ID LL for each visit (unique site/date combination) # SO SEPERATELY FOR EACH GROUP #
 ### ANTS ###
-taxa_data <- ants
-site_date <- unique(taxa_data[,c("site","time_period")])
-loop_thru <- 1:length(site_date[,1]) # not sure why this wasn't when stated in the start of the loop?!
+#taxa_data <- ants
+#site_date <- unique(taxa_data[,c("site","time_period")])
+#loop_thru <- 1:length(site_date[,1]) # not sure why this wasn't when stated in the start of the loop?!
 
-L <- NULL
+#L <- NULL
 ### convert this to an apply or table function ###
 
-for (i in loop_thru) {
-  L <- c(L,nrow(unique(taxa_data[taxa_data$site==site_date[i,"site"]&taxa_data$time_period==site_date[i,"time_period"],])))
-}
+#for (i in loop_thru) {
+ # L <- c(L,nrow(unique(taxa_data[taxa_data$site==site_date[i,"site"]&taxa_data$time_period==site_date[i,"time_period"],])))
+#}
 
-site_date$L <- L
+#site_date$L <- L
 
 ### join site L to the bwars taxa data ###
-ant_data <- merge(taxa_data,site_date)
-ant_data$rec_group <- "ant"
+#ant_data <- merge(taxa_data,site_date)
+#ant_data$rec_group <- "ant"
 
 ### WASPS ###
-taxa_data <- wasps
-site_date <- unique(taxa_data[,c("site","time_period")])
-loop_thru <- 1:length(site_date[,1]) # not sure why this wasn't when stated in the start of the loop?!
+#taxa_data <- wasps
+#site_date <- unique(taxa_data[,c("site","time_period")])
+#loop_thru <- 1:length(site_date[,1]) # not sure why this wasn't when stated in the start of the loop?!
 
-L <- NULL
+#L <- NULL
 ### convert this to an apply or table function ###
 
-for (i in loop_thru) {
-  L <- c(L,nrow(unique(taxa_data[taxa_data$site==site_date[i,"site"]&taxa_data$time_period==site_date[i,"time_period"],])))
-}
+#for (i in loop_thru) {
+ # L <- c(L,nrow(unique(taxa_data[taxa_data$site==site_date[i,"site"]&taxa_data$time_period==site_date[i,"time_period"],])))
+#}
 
-site_date$L <- L
+#site_date$L <- L
 
 ### join site L to the bwars taxa data ###
-wasp_data <- merge(taxa_data,site_date)
-wasp_data$rec_group <- "wasp"
+#wasp_data <- merge(taxa_data,site_date)
+#wasp_data$rec_group <- "wasp"
 
 ### BEES ###
-taxa_data <- bees
+#taxa_data <- bees
+#site_date <- unique(taxa_data[,c("site","time_period")])
+#loop_thru <- 1:length(site_date[,1]) # not sure why this wasn't when stated in the start of the loop?!
+
+#L <- NULL
+### convert this to an apply or table function ###
+
+#for (i in loop_thru) {
+ # L <- c(L,nrow(unique(taxa_data[taxa_data$site==site_date[i,"site"]&taxa_data$time_period==site_date[i,"time_period"],])))
+#}
+
+#site_date$L <- L
+
+### join site L to the bwars taxa data ###
+#bee_data <- merge(taxa_data,site_date)
+#bee_data$rec_group <- "Bee"
+
+### BOMBUS ###
+taxa_data <- bombus
 site_date <- unique(taxa_data[,c("site","time_period")])
 loop_thru <- 1:length(site_date[,1]) # not sure why this wasn't when stated in the start of the loop?!
 
@@ -132,21 +157,23 @@ L <- NULL
 ### convert this to an apply or table function ###
 
 for (i in loop_thru) {
-  L <- c(L,nrow(unique(taxa_data[taxa_data$site==site_date[i,"site"]&taxa_data$time_period==site_date[i,"time_period"],])))
-}
+L <- c(L,nrow(unique(taxa_data[taxa_data$site==site_date[i,"site"]&taxa_data$time_period==site_date[i,"time_period"],])))
+  }
 
 site_date$L <- L
 
 ### join site L to the bwars taxa data ###
-bee_data <- merge(taxa_data,site_date)
-bee_data$rec_group <- "Bee"
+bombus_data <- merge(taxa_data,site_date)
+#bee_data$rec_group <- "Bee"
 
 # merge all groups together
-new_taxa <- rbind(ant_data,wasp_data)
-new_taxa <- rbind(new_taxa,bee_data)
+#new_taxa <- rbind(ant_data,wasp_data)
+#new_taxa <- rbind(new_taxa,bee_data)
 
 ### SAVE THE NEW FILE ###
-write.csv(new_taxa, file="data/bwars_may2014_data_for_occ.csv")
+#write.csv(new_taxa, file="data/bwars_may2014_data_for_occ.csv")
+###version for Bombus only
+write.csv(bombus_data, file="data/bwars_may2014_data_for_occ.csv")
 
 
 
