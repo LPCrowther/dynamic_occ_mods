@@ -9,9 +9,10 @@ rm(list=ls()) # clear R
 ### Load new_taxa ###
 taxa_data <- read.csv("data/bwars_may2014_data_for_occ.csv",header=T) # this is the new bwars data (may 2014) which has been cleaned in prep for the bayesian analysis
 
-new_taxa <- taxa_data[taxa_data$rec_group=="Bee",] # select group of interest
+##This is now hashed out as only Bombus remain in data following changes to data prep script
+#new_taxa <- taxa_data[taxa_data$rec_group=="Bee",] # select group of interest
 #new_taxa <- taxa_data[taxa_data$rec_group=="ant",] # select group of interest
-
+new_taxa <- taxa_data
 
 # drop first column as row ID were saved
 new_taxa <- new_taxa[,-1]
@@ -68,6 +69,7 @@ nyr <- 3  # this parameter will need to be specified by the user when in sparta,
 # simdata <- new_taxa[new_taxa$taxa=="FORMICA rufa",]
 
 require(R2jags)
+library("reshape2", lib.loc="~/R/win-library/3.1")
 
 ##################################### function
 
@@ -217,11 +219,45 @@ simdata[simdata$taxa=="BOMBUS hypnorum","focal"] <- TRUE
       
      #}, USE.NAMES=T, simplify=F) 
       
-      write.csv(out$BUGSoutput$summary, file = "B_hypn_no_vis_column_SS_LL_Site.csv")
+      write.csv(out$BUGSoutput$summary, file = "B_hypn_no_vis_column_SS_LL(Bombus)_Site.csv")
       out$BUGSoutput$summary
     }, USE.NAMES=T, simplify=F)
-  
-  
+
+#####LC plotting functions
+###generate variables
+surveyyear <- c(2000,2001,2002,2003,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012)
+post_2.5_detect <- c(out$BUGSoutput$summary[ 6:19, 4])
+post_97.5_detect <- c(out$BUGSoutput$summary[ 6:19, 8])
+post_2.5_psi <- c(out$BUGSoutput$summary[ 20:33, 4])
+post_97.5_psi <- c(out$BUGSoutput$summary[ 20:33, 8])
+
+###plot posterior detection probabilty over time
+plot(out$BUGSoutput$mean$pdet.alpha  ~ surveyyear, data = out$summary, xlab = "Year", ylab = "Probability", col = "red", type = "line", ylim =c(0,1), main = "Detection = Red, Occupancy = Green, 'LL'= Bombus, dashed = 95% ci")
+ 
+###plot posterior occupancy probability over time
+lines(out$BUGSoutput$mean$psi.fs  ~ surveyyear, data = out$summary, col = "green")
+
+##plot credible intervals
+lines(post_2.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
+lines(post_97.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
+lines(post_2.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
+lines(post_97.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
+
+
+
+
+
+out$BUGSoutput$mean$pdet.alpha 
+
+out$BUGSoutput$mean$psi.fs
+out$BUGSoutput$"2.5%"
+
+
+
+
+
+
+out$BUGSoutput$summary[ 4:4, 6:19]
   names(OccResults) <- OccMods
   
   
