@@ -219,21 +219,52 @@ simdata[simdata$taxa=="BOMBUS hypnorum","focal"] <- TRUE
       
      #}, USE.NAMES=T, simplify=F) 
       
-      write.csv(out$BUGSoutput$summary, file = "B_hypn_no_vis_column_SS_LL(Bombus)_Site.csv")
-      out$BUGSoutput$summary
-    }, USE.NAMES=T, simplify=F)
+      #write.csv(out$BUGSoutput$summary, file = "B_hypn_no_vis_column_SS_LL_Bombus_Site.csv")
+      #out$BUGSoutput$summary
+    
+###save output with date in the filename
+
+write.csv(out$BUGSoutput$summary, file = paste("B_hypn_no_vis_column_SS_LL_Bombus_Site", format(Sys.time(), "%Y-%m-%d %I-%p"), "csv", sep = "."))
+
+out$BUGSoutput$summary
+}, USE.NAMES=T, simplify=F)
+
+## filename needs editing for current version
+#output <- read.csv("B_hypn_no_vis_column_SS_LL_Site.2014-09-29 11-AM.csv")
+output <- read.csv("B_hypn_no_vis_column_SS_LL_Bombus_Site.2014-09-29 02-PM.csv")
 
 #####LC plotting functions
 ###generate variables
 surveyyear <- c(2000,2001,2002,2003,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012)
-post_2.5_detect <- c(out$BUGSoutput$summary[ 6:19, 4])
-post_97.5_detect <- c(out$BUGSoutput$summary[ 6:19, 8])
-post_2.5_psi <- c(out$BUGSoutput$summary[ 20:33, 4])
-post_97.5_psi <- c(out$BUGSoutput$summary[ 20:33, 8])
+post_2.5_detect <- c(output[ 6:19, 4])
+post_50_detect <- c(output[6:19, 6])
+post_97.5_detect <- c(output[ 6:19, 8])
+post_2.5_psi <- c(output[ 20:33, 4])
+post_50_psi <- c(output[20:33, 6])
+post_97.5_psi <- c(output[ 20:33, 8])
+
+###plot posterior detection probabilty over time
+plot(post_50_detect  ~ surveyyear, data = out$summary, xlab = "Year", ylab = "Probability", col = "red", type = "line", ylim =c(0,1), main = "Detection = Red, Occupancy = Green, 'LL'(Bombus only), dashed = 95% ci")
+
+###plot posterior occupancy probability over time
+lines(post_50_psi  ~ surveyyear, data = out$summary, col = "green")
+
+##plot credible intervals
+lines(post_2.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
+lines(post_97.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
+lines(post_2.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
+lines(post_97.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
+
+out<- read.csv("B_hypn_no_vis_column_SS_LL_Site.csv")
+
+##distribution of list length
+hist(read.csv("data/bwars_may2014_data_for_occ.csv")$L, main = "List lengths of all bees")
+hist(L, main = "List length of Bombus")
+
 
 ###plot posterior detection probabilty over time
 plot(out$BUGSoutput$mean$pdet.alpha  ~ surveyyear, data = out$summary, xlab = "Year", ylab = "Probability", col = "red", type = "line", ylim =c(0,1), main = "Detection = Red, Occupancy = Green, 'LL'= Bombus, dashed = 95% ci")
- 
+
 ###plot posterior occupancy probability over time
 lines(out$BUGSoutput$mean$psi.fs  ~ surveyyear, data = out$summary, col = "green")
 
@@ -242,6 +273,7 @@ lines(post_2.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
 lines(post_97.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
 lines(post_2.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
 lines(post_97.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
+
 
 
 
