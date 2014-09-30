@@ -59,7 +59,8 @@ new_taxa <- unique(new_taxa)
 #OccMods <- c('LL_Site','SS_LL','simple')
 #OccMods <- c('LL_Site','Simple')
 #OccMods <- c('Simple')
-OccMods <- c('SS_LL_site')
+#OccMods <- c('SS_LL_site')
+OccMods <- c('Arco')
 
 nyr <- 3  # this parameter will need to be specified by the user when in sparta, could have a default of 3?!
 
@@ -87,7 +88,8 @@ initiate <- function(z, i=1) {
 
 ### currently occ coded for one species, therefore loop through species ###
 spp_list <- unique(as.character(new_taxa$taxa))
-OccMod <- "SS_LL_Site"
+#OccMod <- "SS_LL_Site"
+OccMod <- "Arco"
 
 ####@@@ test on individual species @@@###
 new_taxa$focal <- FALSE
@@ -204,7 +206,7 @@ simdata[simdata$taxa=="BOMBUS hypnorum","focal"] <- TRUE
       # i = sets the initial value for each parameter in the model, varies based on which OccMod is used
       
       ### GIVE JAGS THE BUGS DATA, THE INIT VALUES, THE PARAMS OF INTEREST AND THE LOCATION OF THE BUGS MODEL CODE
-      out <- jags(bugs_data, init.vals, parameters, model.file="W:/PYWELL_SHARED/Pywell Projects/BRC/Gary/Bayesian/Liam/data/Occ_LL_Site.bugs", 
+      out <- jags(bugs_data, init.vals, parameters, model.file="W:/PYWELL_SHARED/Pywell Projects/BRC/Gary/Bayesian/Liam/data/Occ_Arco.bugs", 
                   n.chains=nc, n.iter=ni, n.thin=nt, n.burnin=nb, DIC=TRUE)   
       
       
@@ -224,36 +226,63 @@ simdata[simdata$taxa=="BOMBUS hypnorum","focal"] <- TRUE
     
 ###save output with date in the filename
 
-write.csv(out$BUGSoutput$summary, file = paste("B_hypn_no_vis_column_SS_LL_Bombus_Site", format(Sys.time(), "%Y-%m-%d %I-%p"), "csv", sep = "."))
+write.csv(out$BUGSoutput$summary, file = paste("B_hypn_no_vis_column_Arco_Bombus_Site", format(Sys.time(), "%Y-%m-%d %I-%p"), "csv", sep = "."))
 
 out$BUGSoutput$summary
 }, USE.NAMES=T, simplify=F)
 
 ## filename needs editing for current version
 #output <- read.csv("B_hypn_no_vis_column_SS_LL_Site.2014-09-29 11-AM.csv")
-output <- read.csv("B_hypn_no_vis_column_SS_LL_Bombus_Site.2014-09-29 02-PM.csv")
+#output <- read.csv("B_hypn_no_vis_column_SS_LL_Bombus_Site.2014-09-29 02-PM.csv")
+output <- read.csv("B_hypn_no_vis_column_Arco_Bombus_Site.2014-09-30 09-AM.csv")
 
 #####LC plotting functions
-###generate variables
-surveyyear <- c(2000,2001,2002,2003,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012)
-post_2.5_detect <- c(output[ 6:19, 4])
-post_50_detect <- c(output[6:19, 6])
-post_97.5_detect <- c(output[ 6:19, 8])
-post_2.5_psi <- c(output[ 20:33, 4])
-post_50_psi <- c(output[20:33, 6])
-post_97.5_psi <- c(output[ 20:33, 8])
+###generate variables, for different models need to match coordinates to variables
+surveyyear <- c(2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013)
+#post_2.5_detect <- c(output[ 6:19, 4])
+#post_50_detect <- c(output[6:19, 6])
+#post_97.5_detect <- c(output[ 6:19, 8])
+#post_2.5_psi <- c(output[ 20:33, 4])
+#post_50_psi <- c(output[20:33, 6])
+#post_97.5_psi <- c(output[ 20:33, 8])
+
+post_2.5_detect <- c(output[ 7:20, 4])
+post_50_detect <- c(output[7:20, 6])
+post_97.5_detect <- c(output[ 7:20, 8])
+post_2.5_psi <- c(output[ 49:62, 4])
+post_50_psi <- c(output[49:62, 6])
+post_97.5_psi <- c(output[ 49:62, 8])
+post_2.5_detect_L2.3 <- c(output[ 21:34, 4])
+post_50_detect_L2.3 <- c(output[21:34, 6])
+post_97.5_detect_L2.3 <- c(output[ 21:34, 8])
+post_2.5_detect_L4 <- c(output[ 35:48, 4])
+post_50_detect_L4 <- c(output[ 35:48, 6])
+post_97.5_detect_L4 <- c(output[ 35:48, 8])
 
 ###plot posterior detection probabilty over time
-plot(post_50_detect  ~ surveyyear, data = out$summary, xlab = "Year", ylab = "Probability", col = "red", type = "line", ylim =c(0,1), main = "Detection = Red, Occupancy = Green, 'LL'(Bombus only), dashed = 95% ci")
+plot(post_50_detect  ~ surveyyear, data = output$summary, xlab = "Year", 
+     ylab = "Probability", col = "red", type = "line", ylim =c(0,1), 
+     main = "Detect (LL=1) = Red, Detect (2 <=LL<=3) = light blue, Detect (LL>=4) = dark blue, 
+     Occupancy = Green, 'LL'= Bombus, dashed = 95% ci", cex.main = 0.8, lwd =3)
 
 ###plot posterior occupancy probability over time
-lines(post_50_psi  ~ surveyyear, data = out$summary, col = "green")
+lines(post_50_psi  ~ surveyyear, data = output$summary, col = "green", lwd = 3)
 
 ##plot credible intervals
-lines(post_2.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
-lines(post_97.5_detect  ~ surveyyear, data = out$summary, col = "red", lty = 2)
-lines(post_2.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
-lines(post_97.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
+##sinlgetons
+lines(post_2.5_detect  ~ surveyyear, data = output$summary, col = "red", lty = 2)
+lines(post_97.5_detect  ~ surveyyear, data = output$summary, col = "red", lty = 2)
+##occupancy
+lines(post_2.5_psi  ~ surveyyear, data = output$summary, col = "green", lty = 2)
+lines(post_97.5_psi  ~ surveyyear, data = output$summary, col = "green", lty = 2)
+##short list
+lines(post_2.5_detect_L2.3  ~ surveyyear, data = output$summary, col = "steelblue3", lty = 2)
+lines(post_50_detect_L2.3  ~ surveyyear, data = output$summary, col = "steelblue3", lwd = 3)
+lines(post_97.5_detect_L2.3  ~ surveyyear, data = output$summary, col = "steelblue3", lty = 2)
+##long list
+lines(post_2.5_detect_L4  ~ surveyyear, data = output$summary, col = "blue", lty = 2)
+lines(post_50_detect_L4  ~ surveyyear, data = output$summary, col = "blue", lwd =3)
+lines(post_97.5_detect_L4  ~ surveyyear, data = output$summary, col = "blue", lty = 2)
 
 out<- read.csv("B_hypn_no_vis_column_SS_LL_Site.csv")
 
@@ -263,7 +292,7 @@ hist(L, main = "List length of Bombus")
 
 
 ###plot posterior detection probabilty over time
-plot(out$BUGSoutput$mean$pdet.alpha  ~ surveyyear, data = out$summary, xlab = "Year", ylab = "Probability", col = "red", type = "line", ylim =c(0,1), main = "Detection = Red, Occupancy = Green, 'LL'= Bombus, dashed = 95% ci")
+plot(out$BUGSoutput$mean$pdet.alpha  ~ surveyyear, data = out$summary, xlab = "Year", ylab = "Probability", col = "red", type = "line", ylim =c(0,1), main = "Detect (LL=1) = Red, Detect (2 <=LL<=3), Detect (LL>=4), Occupancy = Green, 'LL'= Bombus, dashed = 95% ci", cex.main = 0.5)
 
 ###plot posterior occupancy probability over time
 lines(out$BUGSoutput$mean$psi.fs  ~ surveyyear, data = out$summary, col = "green")
@@ -280,6 +309,8 @@ lines(post_97.5_psi  ~ surveyyear, data = out$summary, col = "green", lty = 2)
 
 
 out$BUGSoutput$mean$pdet.alpha 
+
+warnings(out$BUGSoutput$mean$pdet.alpha)
 
 out$BUGSoutput$mean$psi.fs
 out$BUGSoutput$"2.5%"
